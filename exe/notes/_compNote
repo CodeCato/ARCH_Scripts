@@ -1,0 +1,20 @@
+#!/bin/bash
+
+## Compile a markdown note to pdf and hide .md
+
+if [[ -f $1 ]]; then
+  path=$1
+  fname=${path##*/}
+  fname=${fname%.*}".pdf"
+  if [[ $fname == .*  ]]; then 
+    fname=${fname#?} 
+  fi
+  pandoc "$1" -V fontsize=12pt -o "$fname" --from markdown --template eisvogel --listings
+
+  if [[ $2 -eq 1 ]]; then
+    mv "$1" ".$1"
+  fi
+else
+  echo "(!) - Specified file does not exist!"
+  exit 1;
+fi

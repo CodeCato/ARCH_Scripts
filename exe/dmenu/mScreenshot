@@ -1,0 +1,49 @@
+#!/bin/sh
+
+function simpleScSht {
+  scrot -m && pidof dunst && dunstify " Screenshot saved in home folder." -t 2100
+  exit 1
+}
+
+function complexScSht {
+  mod=$(echo -e "Screen\nAll Screens\nWindow\nRegion" | dmenu -i -p "Screenshot Mode:")
+  case $mod in
+	"Screen")
+	  mod=""
+	  ;;
+	"All Screens")
+	  mod="-m"
+	  ;;
+	"Window")
+	  mod="-u"
+	  ;;
+	"Region")
+	  mod="-s"
+	  ;;
+	"")
+	  exit 1
+	  ;;
+  esac
+
+  out=$(find ~ -maxdepth 2 -type d -not -path '*/\.*' | dmenu -i -p "File Destination:")
+  fna="$(echo -e "Screenshot\n$(date -u)" | dmenu -i -p "Filename in $out:" | awk '{gsub(/ /,"_")}8').png"
+  [[ !  $mod =~ ^(-u|-s)$ ]] && del=$(echo -e "0\n1\n2\n3\n4\n5" | dmenu -i -p "Select Delay:")
+  
+  if [[ $del =~ ^-?[0-9]+$ ]] ; then
+  	del="-d $del -c"
+  else
+  	del=""
+  fi
+
+  scrot $del $mod $out"/"$fna && pidof dunst && dunstify " Screenshot $fna saved at $out." -t 2100
+  exit 0
+}
+
+case $1 in
+	"-s")
+	  simpleScSht
+	  ;;
+	"-c")
+	  complexScSht
+	  ;;
+esac

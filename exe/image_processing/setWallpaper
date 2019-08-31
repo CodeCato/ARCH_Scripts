@@ -1,0 +1,61 @@
+#!/bin/bash
+
+## Set an image as the new wallpaper
+
+if [ -f "$1" ]
+then
+      echo "(.) - Image $1 found, setting as wallpaper.";
+      
+      ## Copy image to be used as wallpaper
+      cp $1 $HOME/.config/wallBG.png;
+      magick convert $HOME/.config/wallBG.png -resize 1920x1080^ -gravity Center -extent 1920x1080 $HOME/.config/wallBG.png
+      
+      ## Resize to proper resolution
+      magick convert $HOME/.config/wallBG.png -crop 1920x1080+0+0 $HOME/.config/wallBG.png
+      cp $HOME/.config/wallBG.png $HOME/.config/wallBG_clean.png
+      
+      ## Modify image for lock screen usage
+      magick convert $HOME/.config/wallBG.png -resize 1920x1080 -blur 28,10 $HOME/.config/wallBG_blurred.png
+      magick $HOME/.config/wallBG_blurred.png ~/.config/lockIcon.png -gravity center -composite ~/.config/wallBG_lock.png
+      
+      ## Blur wallpaper for polybar background
+      convert \
+      $HOME/.config/wallBG.png \
+      \( -clone 0 -fill white -colorize 100 -fill black \
+      -draw "polygon 0,0 1920,0 1920,26 0,26" \
+      -alpha off -write mpr:mask +delete \
+      -fill "rgba( 0,0,0,0.6 )" -draw "rectangle 0,0,1920,26" \) \
+      -mask mpr:mask -blur 0x14 +mask $HOME/.config/wallBG.png
+      
+      ## Create gradient file
+      magick -size 1920x26 gradient:"rgba( 30,30,30,0.1 )"-"rgba( 0,0,0,0.1 )" -function Polynomial -4,4,0 /tmp/gradientTest.png
+      
+      ## Apply gradient layer to wallpaper
+      magick $HOME/.config/wallBG.png /tmp/gradientTest.png -gravity North -composite $HOME/.config/wallBG.png
+      
+      ## Remove temporary gradient file
+      rm /tmp/gradientTest.png
+      
+      ## Actually apply the wallpaper
+      $HOME/exe/_ex applyWallpaper;
+      
+      ## Add Wallpaper to SDDM Login Screen
+      #orientation="left"
+      columnWidth=543
+      columnTint="10, 10, 20"
+      columnAlpha=0.47
+
+      convert $HOME/.config/wallBG_blurred.png \
+	      -strokewidth 0 -fill "rgba( $columnTint , $columnAlpha )" \
+	      -draw "rectangle 0,0, $columnWidth,1080 " \
+	      $HOME/.config/wallBG_login.png
+
+      sudo cp $HOME/.config/wallBG_login.png /usr/share/sddm/themes/mainTheme/bg.png
+
+      ## Add Wallpaper to GRUB menu
+      sudo cp $HOME/.config/wallBG_blurred.png /boot/grub/themes/poly-dark/background.png
+      #sudo grub-mkconfig -o /boot/grub/grub.cfg
+else
+      echo "(!) - Image $1 does not exist.";
+      exit 1;
+fi

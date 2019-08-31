@@ -1,0 +1,21 @@
+#!/bin/bash
+## Add new script or edit existing one
+
+SCRIPT="/home/lh/exe/$1"
+
+if [ -f "$SCRIPT" ]
+then
+   echo "(?) - Script exists, open in vim?"
+   read -p '[Y/N]' answerVar
+   if [ "$answerVar" = "y" ] || [ "$answerVar" = "Y" ]
+   then
+      vim "$SCRIPT";
+   else
+      echo "(!) - Denied."
+   fi
+else
+   echo "(.) - Creating file, running vim..."
+   touch "$SCRIPT";
+   chmod +x "$SCRIPT";
+   vim "$SCRIPT";
+fi

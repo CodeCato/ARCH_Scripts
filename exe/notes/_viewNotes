@@ -1,0 +1,4 @@
+#!/bin/bash
+## Launches qutebrowser in the notes directory
+
+ranger  /home/lh/doc/notes/;

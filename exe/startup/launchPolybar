@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# Terminate already running bar instances
+killall -q polybar
+
+# Wait until the processes have been shut down
+while pgrep -u $UID -x polybar >/dev/null; do sleep 1; done
+
+# Get screen configuration
+aScrns=$(xrandr | grep " connected " | awk '{print $1}')
+echo $aScrns
+
+# Get amount of screens
+nuScrns=$(xrandr | grep " connected " | awk '{print $1}' | wc -l)
+echo $nuScrns
+
+# Setup monitor variables
+lapMon="eDP-1"
+mainMon="HDMI-2"
+
+# Apply bar configuration
+if [ $nuScrns -eq 1 ]
+  then
+    polybar mainMonLap &
+  else
+    
+    case "$aScrns" in
+      *$lapMon*)
+	 polybar secMonLap & 
+	 ;;
+    esac
+
+    case "$aScrns" in
+      *$mainMon*)
+	 polybar mainMonScreen &
+	 ;;
+
+    esac
+fi	  
+
+echo "Bars launched."

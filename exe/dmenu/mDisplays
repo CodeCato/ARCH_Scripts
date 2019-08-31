@@ -1,0 +1,39 @@
+#!/bin/sh
+
+## A simple dmenu script to quickly add / remove screens
+## from the current xrandr configuration.
+
+function resetUI {
+  $HOME/exe/_ex launchPolybar
+  $HOME/exe/_ex applyWallpaper
+}
+
+scrn=$(xrandr | grep " connected " | awk '{ print $1 }')
+scrn=$(echo "$scrn")$(echo -e "\n...")
+selScrn=$(echo "$scrn" | dmenu -i -p "Select a connected display:")
+[ "$selScrn" = "" ] && exit 1
+[ "$selScrn" = "..." ] && selScrn=$(xrandr | grep "connected" | awk '{ print $1 }' | dmenu -i -p "Select any display adaptor:") 
+edtSta=$(echo -e "Enable\nDisable" | dmenu -i -p "Set screen sate:")
+
+if [ "$edtSta" = Disable ]; then
+   xrandr --output $selScrn --off
+   pgrep -x dunst && dunstify -t 1600 " Screen $selScrn disabled." 
+   resetUI
+   exit 1 
+else
+   avRes=$( xrandr | sed -n "/$selScrn/,/connected/p" | grep -v connected | awk '{ print $1 }')
+   selRes=$(echo "$avRes" | dmenu -i -p "Select a resolution:")
+   selPos=$(echo "0x0" | dmenu -i -p "Set screen position (opt.):")
+   [[ ! $selPos = "" ]] && selPos="--pos "$selPos
+   selRot=$(echo -e "0d\n90d\n180d\n270d" | dmenu -i -p "Select a rotation:")
+   selInv=$(echo -e "No\nX-Axis\nY-Axis" | dmenu -i -p "Invert the screen?")
+   selImp=$(echo -e "No\nYes" | dmenu -i -p "Make screen primary?")
+   if [ ! "$selScrn" = "" ] ; then
+      xrandr --output $selScrn --mode $selRes $selPos
+      pgrep -x dunst && dunstify -t 1600 " Settings for screen $selScrn applied." 
+      resetUI
+      exit 0
+   fi
+fi
+
+exit 1

@@ -1,0 +1,31 @@
+#!/bin/sh
+
+## This script uses dmenu to quickly launch a doom
+## source port with a specified IWAD, PWAD(s) and
+## additional paramters
+
+# Change working directory to placement of zdoom.pk3
+cd /usr/share/games/zdoom/
+
+# Get directories and installed source ports
+config=$HOME/.config/zdoom/zdoom.ini 
+iwadDir=$(cat "$config" | grep -v "#" | grep -A1 "IWADSearch.Directories" | grep -v "IWADSearch.Directories" | awk -F 'Path=' '{ print $2 }')
+pwadDir=$(cat "$config" | grep -v "#" | grep -A1 "FileSearch.Directories" | grep -v "FileSearch.Directories" | awk -F 'Path=' '{ print $2 }')
+sourcePorts=$(pacman -Q | grep doom | awk '{ print $1 }')
+
+# Check if any source ports are running
+pids=$(pidof $sourcePorts)
+if [[ ! $pids = "" ]] ; then
+	$killdoom=$(echo -e "No\nYes" | dmenu -i -p "Quit all DOOM processes?")
+	[[ $killdoom = "No" ]] && dunstify -t 1500 -r 666 " Already running DOOM." && exit 1
+	killall -q $sourcePorts
+fi
+
+# Select Source Port, IWAD & PWAD(s) to use
+spSel=$(echo "$sourcePorts" | dmenu -i -p "Select a Source Port:")
+iwadSel=$(find "$iwadDir" -type f 2>/dev/null | awk -F "$iwadDir" '{ print $2 }' | dmenu -i -p "Select an IWAD to use:")
+pwadSel=$(find "$pwadDir" -type f 2>/dev/null | awk -F "$pwadDir" '{ print $2 }' | dmenu -i -l 10 -p "Select a PWAD to use:")
+addArgs=$(dmenu -p "Add additional arguments:")
+
+# Run game with selected options
+exec "$spSel" -iwad "$iwadSel" -file "$pwadSel" "$addArgs"

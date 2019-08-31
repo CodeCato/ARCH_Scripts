@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Draw Background lock image
+#feh -r -F -V -Z -z /home/lh/.config/wallBG_lock.png
+# Run xxs-lock Lockscreen daemon
+i3lock -n -i /home/lh/.config/wallBG_lock.png

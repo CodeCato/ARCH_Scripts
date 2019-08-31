@@ -1,0 +1,31 @@
+#!/bin/bash
+
+filename=$1
+extension=".${filename#*.}"
+
+nameMD="'.$(echo $1 | awk 'BEGIN{FS=OFS="."} NF--').md'"
+nameMDsimple=".$(echo $1 | awk 'BEGIN{FS=OFS="."} NF--').md"
+
+
+echo $PWd
+
+function editNote {
+  vim "$1"
+  $HOME/exe/_compNote "$1" $2;
+}
+
+if [ "$extension" == ".pdf" ] || [ "$extension" == ".md" ]; then
+  if [ -f "$1" ]; then
+    if [ "$extension" = ".pdf" ]; then
+       editNote "$nameMDsimple" 0;
+    else
+       editNote "$1" 1;
+    fi 
+  else
+    echo "(!) - The specified file does not exist."
+    exit 1
+  fi
+else
+  echo "(!) - The specified file needs to be in .pdf or .md format."
+  exit 1
+fi

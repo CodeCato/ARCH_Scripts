@@ -1,0 +1,5 @@
+#!/bin/bash
+
+## This script simply sets up the wallpaper for the session
+
+feh --bg-fill $HOME/.config/wallBG.png

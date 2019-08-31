@@ -1,0 +1,25 @@
+#!/bin/bash
+## Remove unwanted script from exe folder
+
+SCRIPT="/home/lh/exe/$1"
+
+if [ -f "$SCRIPT" ]
+then
+   if [[ $1 == *"_"* ]];
+   then 
+      echo "(!) - Deleting operator scripts is not permitted."
+      exit 1;
+   fi
+
+   echo "(?) - Script found. Are you sure you want to delete it?"
+   read -p '[Y/N]' answerVar
+   if [ "$answerVar" = "y" ] || [ "$answerVar" = "Y" ]
+   then
+      rm "$SCRIPT"
+      echo "(.) - Deletion successful."
+   else
+      echo "(!) - Denied."
+   fi
+else
+   echo "(!) - Script not found, aborting."
+fi

@@ -1,0 +1,78 @@
+#!/bin/bash
+
+## Script for adjusting screen brightness
+## and giving notification output.
+
+# Check if value specfied
+if [ -z "$2" ];
+then
+   echo "(!) - No value specified. Aborting."
+   exit 1
+fi
+
+# Display dunst notification
+function showBarUI {
+   maxBright=$(cat /sys/class/backlight/intel_backlight/max_brightness);
+   curBright=$(cat /sys/class/backlight/intel_backlight/brightness);
+   perBright=$(bc -l <<< $curBright/$maxBright*100+0.54  | awk -F'.' '{print $1}');
+   
+   # Clamp value
+   if [ "$curBright" -eq 0 ];
+   then
+     perBright=0;
+   fi
+   if ! [ -z "$perBright" ]
+   then
+     if [ "$perBright" -ge 100 ];
+     then
+       perBright="100";
+     fi
+     
+     $HOME/exe/_ex notificationBar $perBright $1 ☀ 6702
+   fi
+}
+
+# Add brightness relative
+function relAdd {
+   maxBright=$(cat /sys/class/backlight/intel_backlight/max_brightness);
+   curBright=$(cat /sys/class/backlight/intel_backlight/brightness);
+   multVal=$(echo "$maxBright/100" | bc -l | awk -F'0' '{print $1}');
+   newBright=$(bc -q <<< $1*$multVal+$curBright | awk -F'.' '{print $1}');
+   if ! [ "$newBright" -gt 0 ];
+   then
+      newBright=0;   
+   fi
+   if [ "$newBright" -gt "$maxBright" ];
+   then
+      newBright=$maxBright;
+   fi
+
+   echo $newBright > /sys/class/backlight/intel_backlight/brightness;
+   
+   showBarUI $1;
+}
+
+# Set absoloute volume
+function absAdd {
+   maxBright=$(cat /sys/class/backlight/intel_backlight/max_brightness);
+   multVal=$(echo "$maxBright/100" | bc -l | awk -F'0' '{print $1}');
+   echo $($1*$multVal) > /sys/class/backlight/intel_backlight/brightness; 
+	
+   showBarUI $1;
+}
+
+# Check mode
+case $1 in
+	"-r")
+	   relAdd $2
+           exit 0;
+	   ;;
+        "-a")
+	   absAdd $2
+	   exit 0;
+	   ;;
+	"*")
+	   echo "(!) - Command $1 not found."
+	   exit 1;
+	   ;;
+esac

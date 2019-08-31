@@ -1,0 +1,43 @@
+#!/bin/bash
+
+## A simple image magick shortcut script that rotates an image
+## ------------------------------------------------------------
+## $1 - image file
+## $2 - degrees
+## $3 - output directory
+
+numArgs=$#
+
+# Check if original file exists
+if ! [ -f "$1" ] ; then
+   echo "(!) - File $1 does not exist."
+   exit 1
+fi
+
+# Setup rotation variable
+degrees=90
+span='^[0-9]+$'
+if [[ $2 =~ $span ]] ; then
+   degrees=$2
+fi
+
+# Check output file
+outf=$1
+lastArg="${!numArgs}"
+if [[ -d $lastArg ]] ; then
+   fileName=$1
+   fileName=${fileName##*/}
+   
+   length=$((${#lastArg}-1))
+   last="${str:$length:1}"
+
+   if ! [[ $last ==  "/" ]] ; then
+      lastArg="${lastArg}/"
+   fi
+
+   outf=$lastArg$fileName
+fi
+
+# Perform image rotation using imagemagick convert
+convert $1 -rotate $degrees $outf
+echo "(.) - Image successfully rotated by $degrees degrees."

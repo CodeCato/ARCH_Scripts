@@ -1,0 +1,11 @@
+#!/bin/bash
+
+curPID="$(pidof tilda)"
+
+if [ $curPID -gt 0 ];
+then
+   killall -q tilda;
+   echo "Tilda was running, nuked it."
+else
+   tilda &
+fi

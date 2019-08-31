@@ -1,0 +1,4 @@
+#!/bin/bash
+/usr/lib/kdeconnectd & 
+sleep 3s
+kdeconnect-indicator &

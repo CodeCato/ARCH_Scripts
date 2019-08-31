@@ -1,0 +1,44 @@
+#!/bin/bash
+## This script sets up various things for the i3 session
+
+ex=$HOME/exe/_ex
+
+echo ">> Setting up PATH variable"
+$ex addExePath
+
+echo ">> Enable screen brirghtness control"
+$ex intel_backlight_acc
+
+echo ">> Restore keyboard layout"
+$ex mKbLayout -r
+
+echo ">> Apply screen layout"
+$ex mainMonLayout.sh
+
+echo ">> Apply wallpaper"
+$ex applyWallpaper
+
+echo ">> Killing i3 bar"
+pidof i3bar && killall -q i3bar
+
+echo ">> Run compton compositor"
+$ex launchCompositor
+
+echo ">> Run Polybar"
+nohup $ex launchPolybar >/dev/null 2>&1&
+
+echo ">> Run Dunst notification engine"
+nohup $ex launchDunst >/dev/null 2>&1&
+
+echo ">> Run Network Manager Applet"
+nohup nm-applet >/dev/null 2>&1&
+
+echo ">> Run Bluetooth Manager Applet"
+nohup blueman-applet >/dev/null 2>&1&
+
+echo ">> Run KDEconnect (+Indicator)"
+$ex launchKdeconnect &
+
+echo ">> Run xxs-lock (Lockscreen daemon)"
+killall -q xss-lock
+xss-lock -l -- $ex lockSession &

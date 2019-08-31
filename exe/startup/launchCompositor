@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Kill all running compton processes
+killall -q compton
+
+# Run compton with local config file
+compton --config $HOME/.config/compton.conf &

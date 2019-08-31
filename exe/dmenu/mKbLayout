@@ -1,0 +1,31 @@
+#!/bin/sh
+
+defFb="us"
+
+if [ "$1" = "-r" ] ; then
+	selkb=$(cat $HOME/.config/lastKbLayout)
+	[[ "$selkb" = "" ]] && selkb=$defFb
+fi
+
+if [ "$1" = "-t" ] ; then
+	tog1=$2
+	tog2=$3
+	curkb=$(cat $HOME/.config/lastKbLayout)
+	[[ "$curkb" = $tog1 ]] && selkb=$tog2
+	[[ "$curkb" = $tog2 ]] && selkb=$tog1
+	
+	[[ "$selkb" = "" ]] && selkb=$2
+fi
+
+if [ "$1" = "" ] ; then
+	prefkbs="us\nuk\nde\n..."
+	selkb=$(echo -e "$prefkbs" | dmenu -i -p "Set Keyboard Layout:")
+	[[ "$selkb" = "..." ]] && selkb=$(localectl list-keymaps | dmenu -i -p "Set Keyboard Layout:")
+fi
+
+[[ "$selkb" = "" ]] && exit 1
+
+setxkbmap "$selkb"
+echo "$selkb" > $HOME/.config/lastKbLayout
+pgrep -x dunst > /dev/null && dunstify -t 1800 -r 8365 " Current KB Layout: $selkb"
+

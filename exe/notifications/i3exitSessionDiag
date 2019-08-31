@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Launch i3-nagbar question exit
+i3-nagbar -t warning -m "Are you sure you want to exit the i3wm session?" -B "Yes" "i3-msg exit" &

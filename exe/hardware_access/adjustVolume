@@ -1,0 +1,59 @@
+#!/bin/bash
+
+## Script for adjusting the volume
+## and giving notification output.
+
+# Check if value specified
+if [ -z "$2" ];
+then
+   echo "(!) - No value specified. Aborting."
+   exit 1
+fi
+
+# Display dunst notification
+function showBarUI {
+   curVol="$(amixer -M get Master | grep Left: | awk -F'[][]' '{ print $2 }' | tr -d '%')"
+   # Clamp value
+   if [ $curVol -ge 100 ];
+   then
+      pactl set-sink-volume 0 100%
+      curVol=100
+   fi
+
+   $HOME/exe/_ex notificationBar $curVol $1  6701
+}
+
+# Add volume relative 
+function relAdd {
+   if [ $1 -ge 0 ];
+   then
+      add=+$1%
+   else
+      add=$1%
+   fi
+
+   pactl set-sink-volume 0 $add
+   showBarUI $1;
+}
+
+# Set absoloute volume
+function absAdd {
+   pactl set-sink-volume 0 $1%
+   showBarUI 0;
+}
+
+# Check mode
+case $1 in
+	"-r")
+	   relAdd $2
+           exit 0;
+	   ;;
+        "-a")
+	   absAdd $2
+	   exit 0;
+	   ;;
+	"*")
+	   echo "(!) - Command $1 not found."
+	   exit 1;
+	   ;;
+esac

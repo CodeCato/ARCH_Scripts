@@ -1,0 +1,7 @@
+#!/bin/sh
+
+## A dmenu script to quicky search a list of emojis
+## and copy the desired one to the clipboard
+
+sel=$(grep -v "#" $HOME/.config/List_Emoji.txt | dmenu -i -l 10 -fn Monospace-17 | awk '{ print $1 }')
+[ ! "$sel" = "" ] && echo $sel | xclip -selection clipboard && pgrep -x dunst >/dev/null && dunstify "$sel copied to clipboard."

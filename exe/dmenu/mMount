@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# Run a dmenu with options for mounting currently connected drives
+# If the seleccted drive is declared in /etc/fstab it will be mounted
+# to its intended mount point
+
+pgrep -x dmenu && exit
+
+avail=$(lsblk -lp | grep "part $"| awk '{print $1, "[" $4 "]"}')
+[[ "$avail" = "" ]] && dunstify -t 1500 -r 001 " No mountable drives." && exit 1
+choice=$(echo -e "$avail" | dmenu -i -p "Mount drive:" | awk '{print $1}')
+[[ "$choice" = "" ]] && exit 1
+#sudo mount "$choice" && exit 0
+
+dirs=$(find /mnt /media /home /opt -type d -maxdepth 4 2>/dev/null)
+mpoint=$(echo "$dirs" | dmenu -i -p "Set mount point:")
+[[ "$mpoint" = "" ]] && exit 1
+if [[ ! -d "$mpoint" ]]; then
+	mkdiryn=$(echo -e "No\nYes" | dmenu -i -p "$mpoint does not exist. Create it?")
+	[[ "$mkdiryn" = Yes ]] && sudo mkdir -p "$mpoint"
+fi
+
+gksudo mount $choice $mpoint && pgrep -x dunst && dunstify -t 1600 " $choice mounted to $mpoint." 
