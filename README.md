@@ -43,7 +43,9 @@ All scripts can be called without needing to add all subfolders to $PATH. The ex
 --├─ womic
 --└─ UnityHub
 --[hardware_access]
---└─ 
+--┌─ adjustBrightness
+--├─ adjustVolume
+--└─ lockSession
 --[filesystem]
 --┌─ extract
 --└─ lfetch
